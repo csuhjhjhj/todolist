@@ -1,0 +1,54 @@
+<view class="container">
+  <view class="header">Todo List</view>
+  <van-cell-group>
+    <van-field 
+      value="{{newTodo.title}}" 
+      placeholder="标题" 
+      bind:input="bindTitleInput" 
+      border 
+    />
+    <van-field 
+      value="{{newTodo.description}}" 
+      placeholder="详细描述" 
+      bind:input="bindDescriptionInput" 
+      border 
+    />
+    <picker mode="date" value="{{newTodo.due_date}}" start="2022-01-01" end="2030-12-31" bindchange="bindDateChange">
+      <van-field 
+        readonly 
+        value="{{newTodo.due_date}}" 
+        placeholder="选择日期" 
+        border 
+      />
+    </picker>
+  </van-cell-group>
+  <van-button type="primary" block bindtap="addTodo">添加事项</van-button>
+  
+  <scroll-view scroll-y="true" class="todo-list">
+    <block wx:for="{{todos}}" wx:key="id">
+      <view class="todo-item">
+        <view class="content">
+          <view class="title">{{item.title}}</view>
+          <view class="description">{{item.description}}</view>
+          <view class="date">截止日期: {{item.due_date}}</view>
+        </view>
+        <view class="actions">
+          <van-button 
+            type="{{item.completed ? 'success' : 'primary'}}" 
+            size="small" 
+            bindtap="toggleCompletion" 
+            data-id="{{item.id}}">
+            {{item.completed ? '已完成' : '标记完成'}}
+          </van-button>
+          <van-button 
+            type="danger" 
+            size="small" 
+            bindtap="deleteTodo" 
+            data-id="{{item.id}}">
+            删除
+          </van-button>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+</view>

@@ -1,0 +1,73 @@
+/* 公共样式 */
+.container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  font-size: 24px;
+  color: #4a90e2;
+  margin: 20px 0;
+  font-weight: bold;
+}
+
+.todo-list {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 20px;
+  max-height: 60vh; /* 设置最大高度，确保其他内容可见 */
+}
+
+.todo-item {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s;
+}
+
+.todo-item:hover {
+  background-color: #f9f9f9;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.date {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.van-button--small {
+  font-size: 14px;
+  height: 28px;
+  line-height: 26px;
+  padding: 0 10px;
+}
