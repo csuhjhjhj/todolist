@@ -1,49 +1,46 @@
 <template>
-  <div class="layui-container">
+  <div class="container">
     <h1 class="h1-todo">Todo List</h1>
-    <div class="todo-inputs">
-      <input class="layui-input"
-             v-model="newTodo.title"
-             placeholder="标题" />
-      <input class="layui-input"
-             v-model="newTodo.description"
-             placeholder="详细描述" />
-      <input class="layui-input"
-             type="date"
-             v-model="newTodo.due_date"
-             style="padding-right: 25px; /* 留出空间 */" />
-      <!-- <button class="layui-btn"
-              @click="addTodo">Add Todo</button> -->
-      <button class="layui-btn add-todo-button"
-              @click="addTodo">Add Todo</button>
-    </div>
+    <van-cell-group>
+      <van-field v-model="newTodo.title"
+                 placeholder="标题"
+                 clearable />
+      <van-field v-model="newTodo.description"
+                 placeholder="详细描述"
+                 clearable />
+      <van-field v-model="newTodo.due_date"
+                 type="date"
+                 placeholder="选择日期" />
+      <van-button type="primary"
+                  block
+                  @click="addTodo">添加事项</van-button>
+    </van-cell-group>
     <div class="todo-list">
-      <div class="todo-item"
-           v-for="todo in todos"
-           :key="todo.id">
-        <div class="content">
-          <div class="title">{{ todo.title }}</div>
-          <div class="description">{{ todo.description }}</div>
-          <div class="date">截止日期: {{ formatDate(todo.due_date) }}</div>
-        </div>
-        <div class="actions">
-          <button @click="toggleCompletion(todo)"
-                  :class="{'completed-icon': todo.completed, 'not-completed-icon': !todo.completed}">
-            <i class="layui-icon"
-               v-if="todo.completed">✅</i>
-            <i class="layui-icon"
-               v-else>◯</i>
-          </button>
-          <button @click="deleteTodo(todo.id)">
-            <i class="layui-icon layui-icon-delete "></i>
-          </button>
-        </div>
-      </div>
+      <van-list>
+        <van-cell v-for="todo in todos"
+                  :key="todo.id"
+                  :title="todo.title"
+                  :label="`详细描述: ${todo.description}`"
+                  is-link>
+          <template #right-icon>
+            <div class="actions">
+              <van-button type="info"
+                          size="small"
+                          icon="cross"
+                          @click="toggleCompletion(todo)"
+                          round>{{ todo.completed ? '未完成' : '完成' }}</van-button>
+              <van-button type="danger"
+                          size="small"
+                          icon="delete"
+                          @click="deleteTodo(todo.id)"
+                          round>删除</van-button>
+            </div>
+          </template>
+        </van-cell>
+      </van-list>
     </div>
   </div>
 </template>
-
-
 
 <script>
 import axios from 'axios';
@@ -110,9 +107,7 @@ export default {
         .catch(error => {
           console.error("Error updating todo:", error);
         });
-    }
-
-    ,
+    },
     deleteTodo (id) {
       axios.delete(`http://localhost:5001/api/todos/${id}`).then(() => {
         this.todos = this.todos.filter(t => t.id !== id);
@@ -124,112 +119,59 @@ export default {
 }
 </script>
 
-
 <style scoped>
 /* 居中并美化标题 */
 .h1-todo {
-  text-align: center; /* 文本居中 */
-  font-size: 24px; /* 增大字体大小 */
-  color: #4a90e2; /* 设定特定颜色 */
-  margin-top: 20px; /* 上边距 */
-  margin-bottom: 20px; /* 下边距 */
-  font-weight: bold; /* 字体加粗 */
+  text-align: center;
+  font-size: 28px;
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 /* 全局字体和背景 */
-.layui-container {
+.container {
   font-family: 'Arial', sans-serif;
-  background-color: #f7f7f7;
+  background-color: #f5f5f5;
   color: #333;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* 输入部分样式 */
-.todo-inputs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
+.van-field {
+  margin-bottom: 15px;
 }
 
-.input {
-  margin-bottom: 10px;
-  width: 100%;
+.van-button {
+  margin-top: 15px;
 }
 
 /* 待办事项列表样式 */
 .todo-list {
-  display: flex;
-  flex-direction: column;
+  margin-top: 20px;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
-/* 单个待办事项样式 */
-.todo-item {
+.actions {
   display: flex;
+  gap: 10px;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid #eee; /* 添加底部边界以区分各待办事项 */
-  margin-bottom: 10px; /* 每个项目之间的间隔 */
 }
 
-.todo-item:hover {
-  background-color: #eef;
+.actions .van-button {
+  margin: 0;
+  padding: 0;
 }
 
-/* 内容区样式 */
-.content {
-  display: flex;
-  align-items: center;
-  flex-grow: 1;
-}
-
-.title {
-  font-weight: bold;
-  font-size: 18px; /* 标题字体大小 */
-  color: #333; /* 标题颜色 */
-}
-.description {
-  font-size: 16px; /* 描述字体大小 */
-  color: #666; /* 描述文字颜色 */
-  margin-left: 20px; /* 与标题的间隔 */
-}
-.date {
-  font-size: 14px; /* 日期字体大小 */
-  color: #999; /* 日期文字颜色 */
-  margin-left: auto; /* 自动左边距，推送到右边 */
-}
-
-.title {
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.description {
-  font-size: 16px;
-  color: #666;
-}
-
-.date {
-  font-size: 14px;
-  color: #999;
-  margin-left: auto;
-}
-
-/* 动作按钮样式 */
-.actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px 10px;
-}
-
-button:focus {
-  outline: none;
-}
-
-.completed-icon,
-.not-completed-icon {
-  font-size: 24px;
+.van-button span {
+  margin-left: 5px;
 }
 
 /* 响应式设计 */
@@ -242,48 +184,5 @@ button:focus {
   .date {
     font-size: 14px;
   }
-}
-.date i.layui-icon {
-  font-size: 20px; /* 调整图标大小 */
-  vertical-align: middle; /* 确保图标垂直居中 */
-  margin-right: 5px; /* 在图标和文本之间添加一些间隔 */
-}
-.layui-input[type='date'] {
-  font-size: 16px; /* 增大字体大小，这也会影响输入框的高度 */
-  padding: 10px; /* 增加内边距，使输入更加舒适 */
-  height: auto; /* 设置高度为自动，依据内容调整 */
-  width: 100%; /* 全宽，或根据需要调整 */
-  border-radius: 8px; /* 圆角边框 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加阴影效果提高视觉效果 */
-}
-@media (max-width: 600px) {
-  .layui-input[type='date'] {
-    font-size: 14px; /* 在较小屏幕上使用更小的字体大小 */
-    padding: 8px; /* 在较小屏幕上减少内边距 */
-  }
-}
-/* 美化并居中按钮 */
-.add-todo-button {
-  display: block; /* 块级元素，允许使用宽度和居中 */
-  width: 50%; /* 按钮宽度 */
-  margin: 0 auto; /* 自动外边距实现水平居中 */
-  background-color: #4caf50; /* 按钮背景颜色 */
-  color: white; /* 文字颜色 */
-  border: none; /* 无边框 */
-  padding: 10px; /* 内边距 */
-  border-radius: 5px; /* 圆角边框 */
-  cursor: pointer; /* 指针光标 */
-  font-size: 16px; /* 字体大小 */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 轻微的阴影效果 */
-  transition: background-color 0.3s; /* 背景色变化的过渡效果 */
-}
-
-.add-todo-button {
-  display: inline-block; /* 允许使用宽度和高度 */
-  width: auto; /* 按钮自适应内容宽度 */
-  padding: 10px 20px; /* 水平和垂直内边距 */
-  line-height: 1.5; /* 调整行高以垂直居中文字 */
-  text-align: center; /* 文字水平居中 */
-  /* 其他样式保持不变 */
 }
 </style>
