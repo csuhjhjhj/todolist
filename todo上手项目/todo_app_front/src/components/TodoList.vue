@@ -10,7 +10,15 @@
                  clearable />
       <van-field v-model="newTodo.due_date"
                  type="date"
-                 placeholder="选择日期" />
+                 placeholder="迷人日期"
+                 @click="showDatePicker"
+                 class="date-field">
+        <template #append>
+          <van-icon name="calendar"
+                    size="20"
+                    color="#4caf50" />
+        </template>
+      </van-field>
       <van-button type="primary"
                   block
                   @click="addTodo"
@@ -18,14 +26,14 @@
     </van-cell-group>
     <div class="todo-list">
       <van-list>
-        <van-cell v-for="todo in todos"
+        <van-cell v-for="todo in sortedTodos"
                   :key="todo.id"
                   :title="todo.title"
                   :label="`详细描述: ${todo.description}`"
                   is-link>
           <template #right-icon>
             <div class="actions">
-              <van-button :type="todo.completed? 'warning' :'success'"
+              <van-button :type="todo.completed ? 'warning' : 'success'"
                           size="small"
                           icon="check"
                           @click="toggleCompletion(todo)"
@@ -34,7 +42,7 @@
                           :class="{'completed': todo.completed}">
                 <template #icon>
                   <i class="fas"
-                     :class="todo.completed? 'fa-check-square' : 'fa-square'"></i>
+                     :class="todo.completed ? 'fa-check-square' : 'fa-square'"></i>
                 </template>
               </van-button>
               <van-button type="danger"
@@ -62,75 +70,68 @@ export default {
         title: '',
         description: '',
         due_date: '',
-        completed: false,
+        completed: false
       },
     };
   },
   created () {
     this.fetchTodos();
   },
+  computed: {
+    sortedTodos () {
+      return this.todos.slice().sort((a, b) => a.completed - b.completed || new Date(b.due_date) - new Date(a.due_date));
+    }
+  },
   methods: {
     formatDate (value) {
       return new Date(value).toLocaleDateString();
     },
     fetchTodos () {
-      axios
-        .get('http://localhost:5001/api/todos')
-        .then(response => {
-          this.todos = response.data;
-          this.sortTodos();
-        })
-        .catch(error => {
-          console.error('Error fetching todos:', error);
-        });
+      axios.get('http://localhost:5001/api/todos').then(response => {
+        this.todos = response.data;
+        this.sortTodos(); // 排序函数调用
+      }).catch(error => {
+        console.error('Error fetching todos:', error);
+      });
     },
     addTodo () {
       if (!this.newTodo.title || !this.newTodo.description || !this.newTodo.due_date) {
         alert('所有字段必须填写！');
         return;
       }
-      axios
-        .post('http://localhost:5001/api/todos', this.newTodo)
-        .then(response => {
-          this.todos.push(response.data);
-          this.newTodo = { title: '', description: '', due_date: '', completed: false };
-          alert('待办事项添加成功！');
-        })
-        .catch(error => {
-          console.error('添加待办事项时出错:', error);
-          alert('添加待办事项失败。');
-        });
+      axios.post('http://localhost:5001/api/todos', this.newTodo).then(response => {
+        this.todos.unshift(response.data);
+        this.sortTodos(); // 排序新添加的待办事项
+        this.newTodo = { title: '', description: '', due_date: '', completed: false };
+        alert('待办事项添加成功！');
+      }).catch(error => {
+        console.error('添加待办事项时出错:', error);
+        alert('添加待办事项失败。');
+      });
     },
     sortTodos () {
-      this.todos.sort((a, b) => a.completed - b.completed);
+      this.todos.sort((a, b) => a.completed - b.completed || new Date(b.due_date) - new Date(a.due_date));
     },
     toggleCompletion (todo) {
-      axios
-        .put(`http://localhost:5001/api/todos/${todo.id}`, {
-          ...todo,
-          completed: !todo.completed
-        })
-        .then(() => {
-          const updatedTodos = this.todos.map(t => t.id === todo.id ? { ...t, completed: !t.completed } : t);
-          this.todos = updatedTodos;
-          this.sortTodos();
-        })
-        .catch(error => {
-          console.error('更新待办事项时出错:', error);
-        });
+      axios.put(`http://localhost:5001/api/todos/${todo.id}`, {
+        ...todo,
+        completed: !todo.completed
+      }).then(() => {
+        todo.completed = !todo.completed;
+        this.sortTodos(); // 更新完成状态后重新排序
+      }).catch(error => {
+        console.error('更新待办事项时出错:', error);
+      });
     },
     deleteTodo (id) {
-      axios
-        .delete(`http://localhost:5001/api/todos/${id}`)
-        .then(() => {
-          this.todos = this.todos.filter(t => t.id !== id);
-        })
-        .catch(error => {
-          console.error('删除待办事项时出错:', error);
-        });
-    },
-  },
-};
+      axios.delete(`http://localhost:5001/api/todos/${id}`).then(() => {
+        this.todos = this.todos.filter(t => t.id !== id);
+      }).catch(error => {
+        console.error('删除待办事项时出错:', error);
+      });
+    }
+  }
+}
 </script>
 
 <style scoped>
